@@ -627,11 +627,11 @@ main {
 }
 
 .weekday-sheet .sheet-table tbody tr {
-  height: 8.6mm;
+  height: 9.65mm;
 }
 
 .holiday-sheet .sheet-table tbody tr {
-  height: 8.2mm;
+  height: 9.2mm;
 }
 
 .sheet-table tr.group-start td {
@@ -867,4 +867,3 @@ main {
     page-break-after: auto;
   }
 }
-
