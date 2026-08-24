@@ -2,6 +2,20 @@
 
 年月を選ぶだけで、その月の日数分の予約表をA4縦・1日1ページで生成し、ブラウザからまとめて印刷できるNext.jsアプリです。予約情報は入力・保存せず、紙へ手書きするための予約表だけを作ります。
 
+## 本番環境
+
+https://reservation-sheet-app.vercel.app
+
+## 主な機能
+
+- 現在年月の初期表示と、前月・翌月への移動
+- 年・月の選択と、月曜始まりのカレンダー表示
+- 土曜・日曜・日本の祝日の自動判定
+- 平日を追加休日へ切り替え、一括解除する機能
+- 平日版20行、土日祝版21行の予約表プレビュー
+- 選択月の日数分をA4縦・1日1ページでまとめて印刷
+- スマートフォン幅に対応した操作画面
+
 ## 技術構成
 
 - Next.js（App Router）
@@ -10,23 +24,26 @@
 - `@holiday-jp/holiday_jp`（日本の祝日データをアプリ内で判定）
 - localStorage（選択年月ごとの追加休日だけを端末内に保存）
 
-## Ubuntuでの起動
+## Ubuntuでのローカル起動
 
 ```bash
 cd ~/projects/reservation-sheet-app
-npm install
+npm ci
 npm run dev
 ```
 
-ブラウザで `http://localhost:3000` を開きます。
+ブラウザで `http://localhost:3000` を開きます。環境変数は不要です。
 
-品質確認:
+## テスト方法
 
 ```bash
-npm test
 npm run lint
+npx tsc --noEmit
+npm test
 npm run build
 ```
+
+自動テストでは、追加休日の保存・復元、休日判定、年月移動、28日・29日・30日・31日の月で印刷DOMのページ数が月の日数と一致することを確認します。
 
 ## 印刷仕様
 
@@ -39,11 +56,18 @@ npm run build
 
 ブラウザの印刷画面では、用紙をA4、向きを縦、倍率を100%に設定し、「ヘッダーとフッター」をオフにしてください。余白はCSSの印刷設定で制御されます。
 
-## 特別休日
+## 追加休日とデータ保存
 
-カレンダー上の平日を押すと、その日を「追加休日」として土日祝版へ切り替えます。もう一度押すと平日版へ戻ります。追加休日は `年-月` ごとにlocalStorageへ保存されます。元々の土日・祝日とは別データとして扱います。
+カレンダー上の平日を押すと、その日を「追加休日」として土日祝版へ切り替えます。もう一度押すと平日版へ戻ります。追加休日は `年-月` ごとにブラウザのlocalStorageへ保存され、元々の土日・祝日とは別データとして扱います。
 
-## Vercelへのデプロイ
+このアプリは顧客情報や予約情報をサーバーへ送信・保存しません。追加休日も操作したブラウザ内だけに保存されます。
 
-GitHubへpushした後、Vercelで新規プロジェクトとしてリポジトリをImportします。Framework PresetはNext.js、Build Commandは `npm run build` のままで公開できます。CLIを使用する場合は、このプロジェクトのディレクトリで `vercel` を実行し、既存プロジェクトではなく新規プロジェクトとして接続してください。
+## デプロイと更新
 
+Vercelの `reservation-sheet-app` プロジェクトがGitHubの `slumber-0608/reservation-sheet-app` の `main` ブランチに接続されています。以後は次の流れで本番へ反映されます。
+
+```text
+ローカルで修正 → GitHubのmainへpush → Vercelが自動デプロイ → 公開アプリ更新
+```
+
+Vercelの設定はFramework PresetがNext.js、Install Commandが `npm ci`、Build Commandが `npm run build`、Output DirectoryがNext.jsの自動設定、環境変数なしです。
