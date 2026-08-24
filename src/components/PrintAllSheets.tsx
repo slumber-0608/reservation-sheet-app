@@ -12,12 +12,12 @@ export function PrintAllSheets({ year, month, customDays }: PrintAllSheetsProps)
 
   return (
     <div className="print-root" aria-hidden="true">
-      {dates.map((date, index) => (
+      {dates.map((date) => (
         <ReservationSheet
           key={date.day}
           date={date}
           holiday={isHolidayKind(getDayKind(date, customDays))}
-          printClassName={index === dates.length - 1 ? "print-sheet print-sheet-last" : "print-sheet"}
+          printClassName="print-sheet"
         />
       ))}
     </div>

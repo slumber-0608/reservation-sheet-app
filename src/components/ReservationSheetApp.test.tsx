@@ -88,14 +88,16 @@ test("追加休日の切替が印刷DOMへ反映され、再マウント後もlo
 
 test("印刷DOMのページ数が28日・29日・30日・31日の月と一致する", () => {
   const cases = [
-    { year: 2026, month: 2, expected: 28 },
+    { year: 2027, month: 2, expected: 28 },
     { year: 2024, month: 2, expected: 29 },
-    { year: 2026, month: 4, expected: 30 },
+    { year: 2026, month: 9, expected: 30 },
     { year: 2026, month: 8, expected: 31 },
   ];
 
   for (const { year, month, expected } of cases) {
     const markup = renderToStaticMarkup(<PrintAllSheets year={year} month={month} customDays={[]} />);
     assert.equal(markup.match(/<article/g)?.length, expected, `${year}年${month}月`);
+    assert.equal(markup.match(/print-sheet/g)?.length, expected, `${year}年${month}月の印刷ページクラス`);
+    assert.doesNotMatch(markup, /print-sheet-last/, `${year}年${month}月の最終ページ専用改ページクラス`);
   }
 });
