@@ -48,6 +48,11 @@ test("追加休日の切替が印刷DOMへ反映され、再マウント後もlo
   assert.ok(container);
 
   let root = await renderApp(container);
+  const stepLabels = Array.from(
+    dom.window.document.querySelectorAll<HTMLElement>(".content-grid .eyebrow"),
+    (element) => element.textContent?.trim(),
+  );
+  assert.deepEqual(stepLabels, ["STEP 1", "STEP 2", "STEP 3"]);
   const day12 = Array.from(dom.window.document.querySelectorAll<HTMLButtonElement>(".calendar-day")).find((button) =>
     button.getAttribute("aria-label")?.startsWith("2026年8月12日"),
   );

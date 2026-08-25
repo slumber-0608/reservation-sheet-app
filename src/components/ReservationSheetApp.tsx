@@ -116,30 +116,32 @@ export function ReservationSheetApp() {
               onClear={clearCustomDays}
             />
 
-            <aside className="print-card" aria-labelledby="print-title">
-              <p className="eyebrow">STEP 3</p>
-              <h2 id="print-title">この月を印刷</h2>
-              <p><strong>{year}年{month}月</strong>の予約表を、日付順に<strong>{daysInMonth}ページ</strong>生成します。</p>
-              <dl className="print-summary">
-                <div><dt>用紙</dt><dd>A4縦</dd></div>
-                <div><dt>ページ</dt><dd>1日1枚</dd></div>
-                <div><dt>追加休日</dt><dd>{customDays.length}日</dd></div>
-              </dl>
-              <button type="button" className="primary-button" onClick={printMonth}>
-                この月を印刷
-              </button>
-              <p className="print-hint">印刷画面では「ヘッダーとフッター」をオフ、倍率を100%にするときれいに収まります。</p>
-            </aside>
-          </div>
+            <PrintPreview
+              year={year}
+              month={month}
+              daysInMonth={daysInMonth}
+              customDays={customDays}
+              selectedDay={selectedDay}
+              onSelectedDayChange={setSelectedDay}
+            />
 
-          <PrintPreview
-            year={year}
-            month={month}
-            daysInMonth={daysInMonth}
-            customDays={customDays}
-            selectedDay={selectedDay}
-            onSelectedDayChange={setSelectedDay}
-          />
+            <div className="print-card-slot">
+              <aside className="print-card" aria-labelledby="print-title">
+                <p className="eyebrow">STEP 3</p>
+                <h2 id="print-title">この月を印刷</h2>
+                <p><strong>{year}年{month}月</strong>の予約表を、日付順に<strong>{daysInMonth}ページ</strong>生成します。</p>
+                <dl className="print-summary">
+                  <div><dt>用紙</dt><dd>A4縦</dd></div>
+                  <div><dt>ページ</dt><dd>1日1枚</dd></div>
+                  <div><dt>追加休日</dt><dd>{customDays.length}日</dd></div>
+                </dl>
+                <button type="button" className="primary-button" onClick={printMonth}>
+                  この月を印刷
+                </button>
+                <p className="print-hint">印刷画面では「ヘッダーとフッター」をオフ、倍率を100%にするときれいに収まります。</p>
+              </aside>
+            </div>
+          </div>
         </main>
 
         <footer className="site-footer">
