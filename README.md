@@ -71,3 +71,33 @@ Vercelの `reservation-sheet-app` プロジェクトがGitHubの `slumber-0608/r
 ```
 
 Vercelの設定はFramework PresetがNext.js、Install Commandが `npm ci`、Build Commandが `npm run build`、Output DirectoryがNext.jsの自動設定、環境変数なしです。
+
+## スマートフォンで印刷画面が開かない場合
+
+「この月を印刷」は、ユーザーのクリック処理内で直接 `window.print()` を呼び出します。全日分の印刷DOMはあらかじめ描画済みなので、フレーム待機は不要です。ただし、APIが存在していても印刷画面を開かない環境があり、戻り値や `afterprint` から印刷成功を判定することはできません。
+
+- iPhone Safari: 共有メニュー →「プリント」。
+- Android Chrome: 右上の「⋮」→「共有」→「印刷」。印刷先で「PDFとして保存」も選べます。
+- アプリ内ブラウザ: メニューからSafari/Chromeへ移動し、年月と追加休日を再確認して印刷。ブラウザ間でlocalStorageは共有されない場合があります。
+- iPhoneでPDF保存:「プリント」のプレビューを広げ、共有から「ファイルに保存」。操作・対応状況はOSの版によって異なります。
+
+共有メニュー経由でも印刷CSSが適用され、選択月の全日分を印刷する設計です。通常画面の共有から直接WebページをPDF化する機能は、印刷CSSと異なる結果になる可能性があるため、上記の印刷プレビュー経由で保存し、日数とページ数を確認してください。独自のPDF生成機能は追加していません。
+
+### ブラウザ回帰テスト
+
+```bash
+npx playwright install chromium webkit
+npm run build
+npm run test:browser
+```
+
+本番ビルドをローカルの3100番ポートで起動して実行します。本番サイトへの反映はありません。
+
+- Desktop Chromium、Pixel 7設定のChromium、iPhone 13設定のWebKitで年月選択、追加休日の切替・復元・解除、プレビュー、印刷呼び出し、例外時の案内、横スクロールがないことを検証。
+- 各設定で28〜31日分の印刷DOM、A4幅、ページ内の高さ、改ページCSSを検証。
+- ChromiumのPC・モバイル設定で実際にPDFを生成し、28・29・30・31ページ、A4縦、各ページの日付、末尾の注意事項、余分な空白ページがないことを検証。
+- WebKitでは印刷CSSまでを検証。PDFページ分割、OSの印刷画面・共有メニュー・AirPrintは実機確認が必要です。
+
+端末設定のエミュレーションは実機Safari/Chromeやアプリ内WebViewと同一ではありません。公開前にiPhone Safari、Android Chrome、使用するアプリ内ブラウザで、ボタン・共有メニュー・PDF保存のそれぞれを確認してください。
+
+参考: [AppleのAirPrint手順](https://support.apple.com/en-gb/109349)、[Android Chromeの印刷・PDF保存手順](https://support.google.com/chrome/answer/1069693?co=GENIE.Platform%3DAndroid&hl=ja)、[Android WebViewの印刷制限](https://developer.android.com/training/printing/html-docs)。Android WebViewはHTML内のJavaScriptによる印刷開始に対応しないと明記されています。

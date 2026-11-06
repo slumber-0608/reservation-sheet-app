@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:browser": "playwright test",
+    "typecheck": "tsc --noEmit",
     "test": "tsx --test src/lib/date-utils.test.ts src/components/ReservationSheetApp.test.tsx"
   },
   "dependencies": {
@@ -16,6 +18,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/postcss": "^4",
     "@types/jsdom": "^30.0.0",
     "@types/node": "^20",
@@ -24,6 +27,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "jsdom": "^29.1.1",
+    "pdfjs-dist": "^6.5.438",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typescript": "^5"

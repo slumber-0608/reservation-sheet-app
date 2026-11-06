@@ -24,6 +24,7 @@ export function ReservationSheetApp() {
   const [selectedDay, setSelectedDay] = useState(1);
   const [customByMonth, setCustomByMonth] = useState<CustomHolidayState>({});
   const [storageReady, setStorageReady] = useState(false);
+  const [printError, setPrintError] = useState(false);
 
   const monthKey = formatMonthKey(year, month);
   const customDays = customByMonth[monthKey] ?? [];
@@ -85,7 +86,16 @@ export function ReservationSheetApp() {
   };
 
   const printMonth = () => {
-    window.requestAnimationFrame(() => window.print());
+    // All monthly sheets are already mounted. Keep this call in the click
+    // handler so browsers can associate it with the user's gesture.
+    try {
+      window.print();
+      setPrintError(false);
+    } catch {
+      setPrintError(true);
+    }
+    // Some browsers silently ignore print(). Keep the manual steps visible;
+    // returning from print() does not prove a dialog opened or printing succeeded.
   };
 
   return (
@@ -138,6 +148,21 @@ export function ReservationSheetApp() {
                 <button type="button" className="primary-button" onClick={printMonth}>
                   この月を印刷
                 </button>
+                {printError && (
+                  <p className="print-error" role="alert">
+                    このブラウザでは印刷を開始できませんでした。下の手順をお試しください。
+                  </p>
+                )}
+                <section className="print-help" aria-labelledby="print-help-title">
+                  <h3 id="print-help-title">印刷画面が開かないとき</h3>
+                  <ul>
+                    <li><strong>iPhone（Safari）：</strong>共有メニューから「プリント」を選びます。</li>
+                    <li><strong>Android（Chrome）：</strong>右上の「⋮」→「共有」→「印刷」を選びます。</li>
+                    <li><strong>アプリ内ブラウザ：</strong>メニューから「Safariで開く」「Chromeで開く」などを選び、開いたブラウザで年月・追加休日を確認してから印刷してください。追加休日は別のブラウザへ引き継がれない場合があります。</li>
+                  </ul>
+                  <p>PDFで保存する場合：iPhoneは「プリント」のプレビューを広げ、共有から「ファイルに保存」。Androidは印刷画面で「PDFとして保存」を選びます。項目名や対応状況はOS・ブラウザによって異なります。</p>
+                  <p>共有メニューからも、選択中の月の全日分を印刷します。用紙はA4・縦を選び、ページ数が{daysInMonth}ページになっていることを確認してください。</p>
+                </section>
                 <p className="print-hint">印刷画面では「ヘッダーとフッター」をオフ、倍率を100%にするときれいに収まります。</p>
               </aside>
             </div>

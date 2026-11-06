@@ -493,6 +493,37 @@ main {
   line-height: 1.7;
 }
 
+.print-help {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #dfd3c1;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.print-help h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.print-help ul {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.print-help li + li {
+  margin-top: 8px;
+}
+
+.print-help p {
+  margin: 12px 0 0;
+}
+
+.print-error {
+  color: var(--red) !important;
+}
+
 .preview-card {
   margin-top: 0;
 }

@@ -28,7 +28,8 @@ function installDom() {
     IS_REACT_ACT_ENVIRONMENT: { value: true, configurable: true },
   });
 
-  dom.window.requestAnimationFrame = (callback) => dom.window.setTimeout(callback, 0);
+  // Do not execute scheduled frames: printing must happen before click returns.
+  dom.window.requestAnimationFrame = () => 0;
   dom.window.print = () => {};
   return dom;
 }
@@ -42,7 +43,8 @@ async function renderApp(container: HTMLElement): Promise<Root> {
   return root;
 }
 
-test("追加休日の切替が印刷DOMへ反映され、再マウント後もlocalStorageから復元される", async () => {
+test("追加休日の切替が印刷DOMへ反映され、再マウント後もlocalStorageから復元される", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-08-01T03:00:00Z") });
   const dom = installDom();
   const container = dom.window.document.querySelector<HTMLElement>("#root");
   assert.ok(container);
@@ -104,5 +106,40 @@ test("印刷DOMのページ数が28日・29日・30日・31日の月と一致す
     assert.equal(markup.match(/<article/g)?.length, expected, `${year}年${month}月`);
     assert.equal(markup.match(/print-sheet/g)?.length, expected, `${year}年${month}月の印刷ページクラス`);
     assert.doesNotMatch(markup, /print-sheet-last/, `${year}年${month}月の最終ページ専用改ページクラス`);
+  }
+});
+
+test("印刷はクリック内で同期実行され、無反応・例外・未対応時にも手順が残る", async () => {
+  const dom = installDom();
+  const container = dom.window.document.querySelector<HTMLElement>("#root")!;
+  const root = await renderApp(container);
+  try {
+    const button = dom.window.document.querySelector<HTMLButtonElement>(".primary-button")!;
+    let calls = 0;
+    dom.window.print = () => {
+      calls += 1;
+      assert.ok(dom.window.document.querySelectorAll(".print-root .print-sheet").length >= 28);
+    };
+    await act(async () => {
+      button.click();
+      assert.equal(calls, 1, "requestAnimationFrameやタイマーを待たずに呼ばれる");
+    });
+    assert.equal(dom.window.document.querySelector('[role="alert"]'), null);
+    assert.match(dom.window.document.querySelector(".print-help")!.textContent!, /Safari.*共有.*プリント/);
+    assert.match(dom.window.document.querySelector(".print-help")!.textContent!, /Chrome.*共有.*印刷/);
+    assert.match(dom.window.document.querySelector(".print-help")!.textContent!, /PDFとして保存/);
+
+    for (const print of [() => { throw new Error("unsupported"); }, undefined]) {
+      Object.defineProperty(dom.window, "print", { value: print, configurable: true, writable: true });
+      await act(async () => button.click());
+      assert.match(dom.window.document.querySelector('[role="alert"]')!.textContent!, /印刷を開始できません/);
+      assert.ok(dom.window.document.querySelector(".print-help"));
+    }
+    dom.window.print = () => {};
+    await act(async () => button.click());
+    assert.equal(dom.window.document.querySelector('[role="alert"]'), null);
+  } finally {
+    await act(async () => root.unmount());
+    dom.window.close();
   }
 });
